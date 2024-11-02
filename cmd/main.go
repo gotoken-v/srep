@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"srep/internal/config"
+	"srep/internal/service"
 )
 
 func main() {
@@ -12,5 +14,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Ошибка загрузки файла .env: %v", err)
 	}
-	config.LoadConfig()
+
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Ошибка загрузки конфигурации: %v", err)
+	}
+
+	srv := service.NewService(cfg)
+	field := srv.GetConfigField()
+	fmt.Println(field)
 }

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -15,6 +14,6 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(cfg)
+
 	return &cfg, nil
 }
