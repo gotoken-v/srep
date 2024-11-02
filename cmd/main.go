@@ -23,4 +23,6 @@ func main() {
 	srv := service.NewService(cfg)
 	field := srv.GetConfigField()
 	fmt.Println(field)
+
+	service.StartServer(cfg)
 }
