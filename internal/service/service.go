@@ -11,3 +11,7 @@ type Service struct {
 func NewService(cfg *config.Config) *Service {
 	return &Service{cfg: cfg}
 }
+
+func (s *Service) GetConfigField() string {
+	return s.cfg.SomeField
+}
