@@ -4,11 +4,10 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"srep/internal/config"
 	"srep/internal/validator"
 )
 
-func StartServer(cfg *config.Config, srv *Service) {
+func StartServer(srv *Service) {
 	app := fiber.New()
 
 	// Универсальная структура для создания и обновления персонажа

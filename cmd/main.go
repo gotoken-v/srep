@@ -38,5 +38,5 @@ func main() {
 	srv := service.NewService(cfg, db)
 
 	// Запускаем сервер и передаем в него конфигурацию и созданный сервис
-	service.StartServer(cfg, srv)
+	service.StartServer(srv)
 }
