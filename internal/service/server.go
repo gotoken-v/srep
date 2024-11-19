@@ -11,11 +11,11 @@ import (
 func StartServer(cfg *config.Config, srv *Service) {
 	app := fiber.New()
 
-	// Структура запроса для создания персонажа
+	// Универсальная структура для создания и обновления персонажа
 	type CharacterRequest struct {
-		Name        string  `json:"name" validate:"required,min=3,max=50"`
-		Species     string  `json:"species" validate:"required,min=3,max=50"`
-		IsForceUser bool    `json:"is_force_user"`
+		Name        *string `json:"name" validate:"omitempty,min=3,max=50,name"`
+		Species     *string `json:"species" validate:"omitempty,min=3,max=50,species"`
+		IsForceUser *bool   `json:"is_force_user" validate:"omitempty,force_user"`
 		Notes       *string `json:"notes"`
 	}
 
@@ -33,13 +33,71 @@ func StartServer(cfg *config.Config, srv *Service) {
 			return c.Status(400).SendString(err.Error())
 		}
 
+		// Устанавливаем значения по умолчанию для необязательных полей
+		name := "Unknown"
+		if req.Name != nil {
+			name = *req.Name
+		}
+
+		species := "Unknown Species"
+		if req.Species != nil {
+			species = *req.Species
+		}
+
+		isForceUser := false
+		if req.IsForceUser != nil {
+			isForceUser = *req.IsForceUser
+		}
+
 		// Создаём персонажа
-		id, err := srv.CreateCharacter(req.Name, req.Species, req.IsForceUser, req.Notes)
+		id, err := srv.CreateCharacter(name, species, isForceUser, req.Notes)
 		if err != nil {
 			return c.Status(500).SendString("Failed to create character")
 		}
 
 		return c.JSON(fiber.Map{"id": id})
+	})
+
+	// Обработчик для обновления персонажа
+	app.Put("/character/:id", func(c *fiber.Ctx) error {
+		id, err := strconv.Atoi(c.Params("id"))
+		if err != nil {
+			return c.Status(400).SendString("Invalid ID")
+		}
+
+		// Парсим тело запроса
+		var req CharacterRequest
+		if err := c.BodyParser(&req); err != nil {
+			return c.Status(400).SendString("Invalid request body")
+		}
+
+		// Валидируем только переданные поля
+		if err := validator.Validate(c.Context(), req); err != nil {
+			return c.Status(400).SendString(err.Error())
+		}
+
+		// Преобразуем структуру в карту для обновления
+		updates := map[string]interface{}{}
+		if req.Name != nil {
+			updates["name"] = *req.Name
+		}
+		if req.Species != nil {
+			updates["species"] = *req.Species
+		}
+		if req.IsForceUser != nil {
+			updates["is_force_user"] = *req.IsForceUser
+		}
+		if req.Notes != nil {
+			updates["notes"] = *req.Notes
+		}
+
+		// Обновляем данные персонажа
+		err = srv.UpdateCharacter(id, updates)
+		if err != nil {
+			return c.Status(500).SendString("Failed to update character")
+		}
+
+		return c.SendString("Character updated successfully")
 	})
 
 	// Обработчик для получения персонажа по ID
@@ -62,28 +120,6 @@ func StartServer(cfg *config.Config, srv *Service) {
 			"is_force_user": isForceUser,
 			"notes":         notes,
 		})
-	})
-
-	// Обработчик для обновления персонажа
-	app.Put("/character/:id", func(c *fiber.Ctx) error {
-		id, err := strconv.Atoi(c.Params("id"))
-		if err != nil {
-			return c.Status(400).SendString("Invalid ID")
-		}
-
-		// Парсим тело запроса в карту
-		var updates map[string]interface{}
-		if err := c.BodyParser(&updates); err != nil {
-			return c.Status(400).SendString("Invalid request body")
-		}
-
-		// Обновляем данные персонажа
-		err = srv.UpdateCharacter(id, updates)
-		if err != nil {
-			return c.Status(500).SendString("Failed to update character")
-		}
-
-		return c.SendString("Character updated successfully")
 	})
 
 	// Обработчик для удаления персонажа
