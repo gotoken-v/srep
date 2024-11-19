@@ -149,5 +149,5 @@ func StartServer(srv *Service) {
 	})
 
 	// Запуск сервера
-	app.Listen(":8080")
+	_ = app.Listen(":8080")
 }
