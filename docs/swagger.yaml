@@ -24,7 +24,7 @@ paths:
         - in: "body"
           name: "body"
           description: "Данные персонажа"
-          required: true
+          required: false
           schema:
             $ref: "#/definitions/CharacterRequest"
       responses:
@@ -68,7 +68,7 @@ paths:
         - in: "body"
           name: "body"
           description: "Обновляемые данные персонажа"
-          required: true
+          required: false
           schema:
             $ref: "#/definitions/CharacterRequest"
       responses:
@@ -84,8 +84,6 @@ paths:
           description: "Персонаж не найден"
           schema:
             $ref: "#/definitions/ErrorResponse"
-
-  /character/{id}:
     delete:
       summary: "Delete Character by ID"
       description: "Удалить персонажа по ID"
