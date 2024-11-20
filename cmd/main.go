@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-
 	// Загружаем переменные окружения из файла .env
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -39,5 +38,5 @@ func main() {
 	srv := service.NewService(cfg, db)
 
 	// Запускаем сервер и передаем в него конфигурацию и созданный сервис
-	service.StartServer(cfg, srv)
+	service.StartServer(srv)
 }

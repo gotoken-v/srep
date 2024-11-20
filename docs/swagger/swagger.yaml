@@ -1,0 +1,156 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Star Wars Character Management API"
+  description: "API для управления персонажами вселенной Star Wars"
+  contact:
+    name: "API Support"
+    email: "support@example.com"
+host: "localhost:8080"
+basePath: "/"
+schemes:
+  - "http"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+paths:
+  /character:
+    post:
+      summary: "Create Character"
+      description: "Создать нового персонажа"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Данные персонажа"
+          required: false
+          schema:
+            $ref: "#/definitions/CharacterRequest"
+      responses:
+        200:
+          description: "Персонаж создан успешно"
+          schema:
+            $ref: "#/definitions/Response"
+        400:
+          description: "Некорректный запрос"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /character/{id}:
+    get:
+      summary: "Get Character by ID"
+      description: "Получить информацию о персонаже по ID"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "integer"
+          description: "ID персонажа"
+      responses:
+        200:
+          description: "Информация о персонаже"
+          schema:
+            $ref: "#/definitions/Response"
+        404:
+          description: "Персонаж не найден"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      summary: "Update Character by ID"
+      description: "Обновить данные персонажа"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "integer"
+          description: "ID персонажа"
+        - in: "body"
+          name: "body"
+          description: "Обновляемые данные персонажа"
+          required: false
+          schema:
+            $ref: "#/definitions/CharacterRequest"
+      responses:
+        200:
+          description: "Персонаж успешно обновлён"
+          schema:
+            $ref: "#/definitions/Response"
+        400:
+          description: "Некорректный запрос"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        404:
+          description: "Персонаж не найден"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      summary: "Delete Character by ID"
+      description: "Удалить персонажа по ID"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "integer"
+          description: "ID персонажа"
+      responses:
+        200:
+          description: "Персонаж успешно удалён"
+          schema:
+            $ref: "#/definitions/Response"
+        404:
+          description: "Персонаж не найден"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+  /characters:
+    get:
+      summary: "Get All Characters"
+      description: "Получить список всех персонажей"
+      responses:
+        200:
+          description: "Список персонажей"
+          schema:
+            $ref: "#/definitions/Response"
+
+definitions:
+  CharacterRequest:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        example: "Luke Skywalker"
+      species:
+        type: "string"
+        example: "Human"
+      is_force_user:
+        type: "boolean"
+        example: true
+      notes:
+        type: "string"
+        example: "Trained by Obi-Wan Kenobi"
+
+  Response:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+        example: "success"
+      data:
+        type: "object"
+        example:
+          id: 1
+          name: "Luke Skywalker"
+          species: "Human"
+          is_force_user: true
+          notes: "Trained by Obi-Wan Kenobi"
+
+  ErrorResponse:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+        example: "error"
+      error:
+        type: "string"
+        example: "Character not found"

@@ -5,7 +5,6 @@ import (
 )
 
 type Config struct {
-	SomeField  string `envconfig:"SOME_FIELD"`
 	DBHost     string `envconfig:"DB_HOST"`
 	DBPort     string `envconfig:"DB_PORT"`
 	DBUser     string `envconfig:"DB_USER"`
