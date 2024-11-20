@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
-	"log"
 	"srep/internal/config"
 	"srep/internal/service"
 )
 
 func main() {
-	// Загружаем переменные окружения из файла .env
-	err := godotenv.Load(".env")
-	if err != nil {
+	// Загружаем переменные окружения
+	if err := godotenv.Load(".env"); err != nil {
 		log.Fatalf("Ошибка загрузки файла .env: %v", err)
 	}
 
@@ -25,7 +25,8 @@ func main() {
 
 	// Формируем строку подключения к базе данных
 	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
-		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName)
+		cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort, cfg.DBName,
+	)
 
 	// Подключаемся к базе данных через пул соединений
 	db, err := pgxpool.Connect(context.Background(), connStr)
@@ -34,9 +35,12 @@ func main() {
 	}
 	defer db.Close()
 
-	// Создаем сервис и передаем в него конфигурацию и подключение к базе данных
-	srv := service.NewService(cfg, db)
+	// Создаём реальный репозиторий
+	repo := service.NewRepository(db)
 
-	// Запускаем сервер и передаем в него конфигурацию и созданный сервис
+	// Создаём сервис
+	srv := service.NewService(repo)
+
+	// Запускаем сервер
 	service.StartServer(srv)
 }
