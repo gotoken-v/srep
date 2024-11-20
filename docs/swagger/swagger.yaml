@@ -120,15 +120,25 @@ definitions:
       name:
         type: "string"
         example: "Luke Skywalker"
+        minLength: 3
+        maxLength: 50
+        pattern: "^[a-zA-Z0-9\\s]+$"
+        description: "Name must contain only letters, digits, and spaces (3-50 characters)"
       species:
         type: "string"
         example: "Human"
+        minLength: 3
+        maxLength: 50
+        pattern: "^[a-zA-Z\\s]+$"
+        description: "Species must contain only letters and spaces (3-50 characters)"
       is_force_user:
         type: "boolean"
         example: true
+        description: "Indicates if the character is a Force user"
       notes:
         type: "string"
         example: "Trained by Obi-Wan Kenobi"
+        description: "Additional notes about the character"
 
   Response:
     type: "object"
