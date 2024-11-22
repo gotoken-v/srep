@@ -1,11 +1,11 @@
-package service
+package service_test
 
 import (
 	"context"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"srep/internal/service"
+	"testing"
 )
 
 // MockRepository реализует моки для репозитория.
@@ -40,11 +40,11 @@ func (m *MockRepository) GetAllCharacters(ctx context.Context) ([]map[string]int
 
 func TestService_CreateCharacter(t *testing.T) {
 	mockRepo := new(MockRepository)
-	service := NewService(mockRepo)
+	svc := service.NewService(mockRepo)
 
 	mockRepo.On("CreateCharacter", mock.Anything, "Luke", "Human", true, (*string)(nil)).Return(1, nil)
 
-	id, err := service.CreateCharacter("Luke", "Human", true, nil)
+	id, err := svc.CreateCharacter(context.Background(), "Luke", "Human", true, nil)
 
 	assert.NoError(t, err)
 	assert.Equal(t, 1, id)
@@ -53,11 +53,11 @@ func TestService_CreateCharacter(t *testing.T) {
 
 func TestService_GetCharacter(t *testing.T) {
 	mockRepo := new(MockRepository)
-	service := NewService(mockRepo)
+	svc := service.NewService(mockRepo)
 
 	mockRepo.On("GetCharacter", mock.Anything, 1).Return("Luke", "Human", true, (*string)(nil), nil)
 
-	name, species, isForceUser, notes, err := service.GetCharacter(1)
+	name, species, isForceUser, notes, err := svc.GetCharacter(context.Background(), 1)
 
 	assert.NoError(t, err)
 	assert.Equal(t, "Luke", name)
@@ -69,14 +69,12 @@ func TestService_GetCharacter(t *testing.T) {
 
 func TestService_UpdateCharacter(t *testing.T) {
 	mockRepo := new(MockRepository)
-	service := NewService(mockRepo)
+	svc := service.NewService(mockRepo)
 
-	updates := map[string]interface{}{
-		"name": "Luke Skywalker",
-	}
+	updates := map[string]interface{}{"name": "Luke Skywalker"}
 	mockRepo.On("UpdateCharacter", mock.Anything, 1, updates).Return(nil)
 
-	err := service.UpdateCharacter(1, updates)
+	err := svc.UpdateCharacter(context.Background(), 1, updates)
 
 	assert.NoError(t, err)
 	mockRepo.AssertExpectations(t)
@@ -84,11 +82,11 @@ func TestService_UpdateCharacter(t *testing.T) {
 
 func TestService_DeleteCharacter(t *testing.T) {
 	mockRepo := new(MockRepository)
-	service := NewService(mockRepo)
+	svc := service.NewService(mockRepo)
 
 	mockRepo.On("DeleteCharacter", mock.Anything, 1).Return(nil)
 
-	err := service.DeleteCharacter(1)
+	err := svc.DeleteCharacter(context.Background(), 1)
 
 	assert.NoError(t, err)
 	mockRepo.AssertExpectations(t)
@@ -96,14 +94,14 @@ func TestService_DeleteCharacter(t *testing.T) {
 
 func TestService_GetAllCharacters(t *testing.T) {
 	mockRepo := new(MockRepository)
-	service := NewService(mockRepo)
+	svc := service.NewService(mockRepo)
 
 	characters := []map[string]interface{}{
 		{"id": 1, "name": "Luke", "species": "Human", "is_force_user": true, "notes": nil},
 	}
 	mockRepo.On("GetAllCharacters", mock.Anything).Return(characters, nil)
 
-	result, err := service.GetAllCharacters()
+	result, err := svc.GetAllCharacters(context.Background())
 
 	assert.NoError(t, err)
 	assert.Equal(t, characters, result)
