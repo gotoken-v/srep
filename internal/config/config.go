@@ -18,6 +18,5 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &cfg, nil
 }

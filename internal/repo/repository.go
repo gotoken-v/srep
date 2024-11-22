@@ -1,4 +1,4 @@
-package service
+package repo
 
 import (
 	"context"
@@ -6,26 +6,15 @@ import (
 	"strconv"
 )
 
-// RepositoryInterface определяет методы для взаимодействия с базой данных.
-type RepositoryInterface interface {
-	CreateCharacter(ctx context.Context, name, species string, isForceUser bool, notes *string) (int, error)
-	GetCharacter(ctx context.Context, id int) (string, string, bool, *string, error)
-	UpdateCharacter(ctx context.Context, id int, updates map[string]interface{}) error
-	DeleteCharacter(ctx context.Context, id int) error
-	GetAllCharacters(ctx context.Context) ([]map[string]interface{}, error)
-}
-
-// Repository реализует методы взаимодействия с реальной базой данных.
 type Repository struct {
 	db *pgxpool.Pool
 }
 
-// NewRepository создаёт новый экземпляр Repository.
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{db: db}
 }
 
-func (r *Repository) CreateCharacter(ctx context.Context, name string, species string, isForceUser bool, notes *string) (int, error) {
+func (r *Repository) CreateCharacter(ctx context.Context, name, species string, isForceUser bool, notes *string) (int, error) {
 	var id int
 	err := r.db.QueryRow(ctx, `
         INSERT INTO starwars_characters (name, species, is_force_user, notes)
