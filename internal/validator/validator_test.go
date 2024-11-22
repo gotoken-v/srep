@@ -1,10 +1,10 @@
-package validator
+package validator_test
 
 import (
 	"context"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
+	"srep/internal/validator"
+	"testing"
 )
 
 // TestStruct представляет тестовую структуру для проверки кастомных валидаторов.
@@ -32,13 +32,13 @@ func TestValidate(t *testing.T) {
 			name:       "Invalid name",
 			input:      TestStruct{Name: "Luke@", Species: "Human", IsForceUser: true, Notes: nil},
 			wantErr:    true,
-			wantErrMsg: ErrInvalidName + ": TestStruct.Name",
+			wantErrMsg: validator.ErrInvalidName + ": TestStruct.Name",
 		},
 		{
 			name:       "Invalid species",
 			input:      TestStruct{Name: "Luke Skywalker", Species: "Hum@n", IsForceUser: true, Notes: nil},
 			wantErr:    true,
-			wantErrMsg: ErrInvalidSpecies + ": TestStruct.Species",
+			wantErrMsg: validator.ErrInvalidSpecies + ": TestStruct.Species",
 		},
 		{
 			name:       "Invalid force user",
@@ -56,7 +56,7 @@ func TestValidate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Validate(context.Background(), tt.input)
+			err := validator.Validate(context.Background(), tt.input)
 			if tt.wantErr {
 				assert.NotNil(t, err)
 				assert.EqualError(t, err, tt.wantErrMsg)
