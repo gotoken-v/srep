@@ -2,7 +2,9 @@ package repo
 
 import (
 	"context"
+	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"srep/internal/config"
 	"strconv"
 )
 
@@ -10,8 +12,23 @@ type Repository struct {
 	db *pgxpool.Pool
 }
 
-func NewRepository(db *pgxpool.Pool) *Repository {
+// NewRepository создаёт новое подключение к базе данных
+func NewRepository(cfg *config.Config) *Repository {
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+		cfg.PostgreSQL.DBUser, cfg.PostgreSQL.DBPassword, cfg.PostgreSQL.DBHost, cfg.PostgreSQL.DBPort, cfg.PostgreSQL.DBName,
+	)
+
+	db, err := pgxpool.Connect(context.Background(), connStr)
+	if err != nil {
+		panic("Ошибка подключения к базе данных: " + err.Error())
+	}
+
 	return &Repository{db: db}
+}
+
+// Close закрывает соединение с базой данных
+func (r *Repository) Close() {
+	r.db.Close()
 }
 
 func (r *Repository) CreateCharacter(ctx context.Context, name, species string, isForceUser bool, notes *string) (int, error) {

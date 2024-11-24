@@ -1,10 +1,15 @@
 package config
 
 import (
+	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {
+	PostgreSQL PostgreSQLConfig
+}
+
+type PostgreSQLConfig struct {
 	DBHost     string `envconfig:"DB_HOST"`
 	DBPort     string `envconfig:"DB_PORT"`
 	DBUser     string `envconfig:"DB_USER"`
@@ -13,10 +18,8 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
+	_ = godotenv.Load()
 	var cfg Config
 	err := envconfig.Process("", &cfg)
-	if err != nil {
-		return nil, err
-	}
-	return &cfg, nil
+	return &cfg, err
 }
