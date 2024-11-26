@@ -1,21 +1,12 @@
 package service
 
-import "context"
+import "github.com/gofiber/fiber/v2"
 
 // ServiceInterface определяет методы бизнес-логики приложения.
 type ServiceInterface interface {
-	// Создание нового персонажа
-	CreateCharacter(ctx context.Context, name, species string, isForceUser bool, notes *string) (int, error)
-
-	// Получение персонажа по ID
-	GetCharacter(ctx context.Context, id int) (string, string, bool, *string, error)
-
-	// Обновление персонажа
-	UpdateCharacter(ctx context.Context, id int, updates map[string]interface{}) error
-
-	// Удаление персонажа
-	DeleteCharacter(ctx context.Context, id int) error
-
-	// Получение списка всех персонажей
-	GetAllCharacters(ctx context.Context) ([]map[string]interface{}, error)
+	CreateCharacter(c *fiber.Ctx) error
+	UpdateCharacter(c *fiber.Ctx) error
+	GetCharacter(c *fiber.Ctx) error
+	DeleteCharacter(c *fiber.Ctx) error
+	GetAllCharacters(c *fiber.Ctx) error
 }
