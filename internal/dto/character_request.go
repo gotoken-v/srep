@@ -1,8 +1,8 @@
 package dto
 
 type CharacterRequest struct {
-	Name        string  `json:"name"`
-	Species     string  `json:"species"`
-	IsForceUser bool    `json:"is_force_user"`
-	Notes       *string `json:"notes,omitempty"`
+	Name        *string `json:"name" validate:"required,min=3,max=50"`
+	Species     *string `json:"species" validate:"required,min=3,max=50"`
+	IsForceUser *bool   `json:"is_force_user" validate:"required"`
+	Notes       *string `json:"notes" validate:"omitempty,max=255"`
 }
