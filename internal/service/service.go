@@ -29,20 +29,24 @@ func (s *Service) CreateCharacter(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
-	name := "Unknown"
-	if req.Name != nil {
-		name = *req.Name
-	}
-	species := "Unknown"
-	if req.Species != nil {
-		species = *req.Species
-	}
-	isForceUser := false
-	if req.IsForceUser != nil {
-		isForceUser = *req.IsForceUser
+	character := repo.Character{
+		Name:        "Unknown",
+		Species:     "Unknown",
+		IsForceUser: false,
+		Notes:       req.Notes,
 	}
 
-	id, err := s.repo.CreateCharacter(c.Context(), name, species, isForceUser, req.Notes)
+	if req.Name != nil {
+		character.Name = *req.Name
+	}
+	if req.Species != nil {
+		character.Species = *req.Species
+	}
+	if req.IsForceUser != nil {
+		character.IsForceUser = *req.IsForceUser
+	}
+
+	id, err := s.repo.CreateCharacter(c.Context(), character)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to create character")
 	}
@@ -95,18 +99,12 @@ func (s *Service) GetCharacter(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid ID")
 	}
 
-	name, species, isForceUser, notes, err := s.repo.GetCharacter(c.Context(), id)
+	character, err := s.repo.GetCharacter(c.Context(), id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).SendString("Character not found")
 	}
 
-	return c.JSON(fiber.Map{
-		"id":            id,
-		"name":          name,
-		"species":       species,
-		"is_force_user": isForceUser,
-		"notes":         notes,
-	})
+	return c.JSON(character)
 }
 
 // DeleteCharacter обрабатывает запрос на удаление персонажа.

@@ -18,7 +18,7 @@ const (
 		INSERT INTO starwars_characters (name, species, is_force_user, notes)
 		VALUES ($1, $2, $3, $4) RETURNING id`
 	getCharacterQuery = `
-		SELECT name, species, is_force_user, notes
+		SELECT id, name, species, is_force_user, notes
 		FROM starwars_characters WHERE id=$1`
 	updateCharacterQueryPrefix = "UPDATE starwars_characters SET "
 	deleteCharacterQuery       = "DELETE FROM starwars_characters WHERE id=$1"
@@ -46,18 +46,19 @@ func (r *Repository) Close() {
 	r.db.Close()
 }
 
-func (r *Repository) CreateCharacter(ctx context.Context, name, species string, isForceUser bool, notes *string) (int, error) {
+func (r *Repository) CreateCharacter(ctx context.Context, character Character) (int, error) {
 	var id int
-	err := r.db.QueryRow(ctx, createCharacterQuery, name, species, isForceUser, notes).Scan(&id)
+	err := r.db.QueryRow(ctx, createCharacterQuery, character.Name, character.Species, character.IsForceUser, character.Notes).Scan(&id)
 	return id, err
 }
 
-func (r *Repository) GetCharacter(ctx context.Context, id int) (string, string, bool, *string, error) {
-	var name, species string
-	var isForceUser bool
-	var notes *string
-	err := r.db.QueryRow(ctx, getCharacterQuery, id).Scan(&name, &species, &isForceUser, &notes)
-	return name, species, isForceUser, notes, err
+func (r *Repository) GetCharacter(ctx context.Context, id int) (*Character, error) {
+	var character Character
+	err := r.db.QueryRow(ctx, getCharacterQuery, id).Scan(&character.ID, &character.Name, &character.Species, &character.IsForceUser, &character.Notes)
+	if err != nil {
+		return nil, err
+	}
+	return &character, nil
 }
 
 func (r *Repository) UpdateCharacter(ctx context.Context, id int, updates map[string]interface{}) error {
@@ -87,30 +88,19 @@ func (r *Repository) DeleteCharacter(ctx context.Context, id int) error {
 	return err
 }
 
-func (r *Repository) GetAllCharacters(ctx context.Context) ([]map[string]interface{}, error) {
+func (r *Repository) GetAllCharacters(ctx context.Context) ([]Character, error) {
 	rows, err := r.db.Query(ctx, getAllCharactersQuery)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var characters []map[string]interface{}
+	var characters []Character
 	for rows.Next() {
-		var id int
-		var name, species string
-		var isForceUser bool
-		var notes *string
-		err = rows.Scan(&id, &name, &species, &isForceUser, &notes)
+		var character Character
+		err = rows.Scan(&character.ID, &character.Name, &character.Species, &character.IsForceUser, &character.Notes)
 		if err != nil {
 			return nil, err
-		}
-
-		character := map[string]interface{}{
-			"id":            id,
-			"name":          name,
-			"species":       species,
-			"is_force_user": isForceUser,
-			"notes":         notes,
 		}
 		characters = append(characters, character)
 	}
