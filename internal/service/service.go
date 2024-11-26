@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"srep/internal/dto"
 	"srep/internal/repo"
-	"srep/internal/validator"
+	"srep/pkg/validator"
 	"strconv"
 )
 
