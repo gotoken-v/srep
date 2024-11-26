@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"log"
 	"srep/internal/config"
 	"strconv"
 )
@@ -11,6 +12,20 @@ import (
 type Repository struct {
 	db *pgxpool.Pool
 }
+
+const (
+	createCharacterQuery = `
+		INSERT INTO starwars_characters (name, species, is_force_user, notes)
+		VALUES ($1, $2, $3, $4) RETURNING id`
+	getCharacterQuery = `
+		SELECT name, species, is_force_user, notes
+		FROM starwars_characters WHERE id=$1`
+	updateCharacterQueryPrefix = "UPDATE starwars_characters SET "
+	deleteCharacterQuery       = "DELETE FROM starwars_characters WHERE id=$1"
+	getAllCharactersQuery      = `
+		SELECT id, name, species, is_force_user, notes
+		FROM starwars_characters`
+)
 
 // NewRepository создаёт новое подключение к базе данных
 func NewRepository(cfg *config.Config) *Repository {
@@ -20,7 +35,7 @@ func NewRepository(cfg *config.Config) *Repository {
 
 	db, err := pgxpool.Connect(context.Background(), connStr)
 	if err != nil {
-		panic("Ошибка подключения к базе данных: " + err.Error())
+		log.Fatalf("Ошибка подключения к базе данных: %v", err)
 	}
 
 	return &Repository{db: db}
@@ -33,9 +48,7 @@ func (r *Repository) Close() {
 
 func (r *Repository) CreateCharacter(ctx context.Context, name, species string, isForceUser bool, notes *string) (int, error) {
 	var id int
-	err := r.db.QueryRow(ctx, `
-        INSERT INTO starwars_characters (name, species, is_force_user, notes)
-        VALUES ($1, $2, $3, $4) RETURNING id`, name, species, isForceUser, notes).Scan(&id)
+	err := r.db.QueryRow(ctx, createCharacterQuery, name, species, isForceUser, notes).Scan(&id)
 	return id, err
 }
 
@@ -43,9 +56,7 @@ func (r *Repository) GetCharacter(ctx context.Context, id int) (string, string, 
 	var name, species string
 	var isForceUser bool
 	var notes *string
-	err := r.db.QueryRow(ctx, `
-        SELECT name, species, is_force_user, notes
-        FROM starwars_characters WHERE id=$1`, id).Scan(&name, &species, &isForceUser, &notes)
+	err := r.db.QueryRow(ctx, getCharacterQuery, id).Scan(&name, &species, &isForceUser, &notes)
 	return name, species, isForceUser, notes, err
 }
 
@@ -54,7 +65,7 @@ func (r *Repository) UpdateCharacter(ctx context.Context, id int, updates map[st
 		return nil
 	}
 
-	query := "UPDATE starwars_characters SET "
+	query := updateCharacterQueryPrefix
 	args := []interface{}{}
 	argIndex := 1
 
@@ -72,14 +83,12 @@ func (r *Repository) UpdateCharacter(ctx context.Context, id int, updates map[st
 }
 
 func (r *Repository) DeleteCharacter(ctx context.Context, id int) error {
-	_, err := r.db.Exec(ctx, "DELETE FROM starwars_characters WHERE id=$1", id)
+	_, err := r.db.Exec(ctx, deleteCharacterQuery, id)
 	return err
 }
 
 func (r *Repository) GetAllCharacters(ctx context.Context) ([]map[string]interface{}, error) {
-	rows, err := r.db.Query(ctx, `
-        SELECT id, name, species, is_force_user, notes
-        FROM starwars_characters`)
+	rows, err := r.db.Query(ctx, getAllCharactersQuery)
 	if err != nil {
 		return nil, err
 	}
